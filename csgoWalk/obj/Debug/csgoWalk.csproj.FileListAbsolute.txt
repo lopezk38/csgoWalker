@@ -1,0 +1,11 @@
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\bin\Debug\csgoWalk.exe
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\bin\Debug\csgoWalk.pdb
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\bin\Debug\vJoyInterfaceWrap.dll
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.csprojAssemblyReference.cache
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.walkerWindow.resources
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.Properties.Resources.resources
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.csproj.GenerateResource.cache
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.csproj.CoreCompileInputs.cache
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.csproj.CopyComplete
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.exe
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.pdb

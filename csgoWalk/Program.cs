@@ -10,12 +10,21 @@ namespace csgoWalk
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+
+        public static walkerWindow walkerWindowObj;
+
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            walkerWindowObj = new walkerWindow();
+            if (walkerWindowObj == null)
+            {
+                Console.WriteLine("test DNE");
+            }
+            else Console.WriteLine("test");
+            Application.Run(walkerWindowObj);
         }
     }
 }
