@@ -19,11 +19,6 @@ namespace csgoWalk
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             walkerWindowObj = new walkerWindow();
-            if (walkerWindowObj == null)
-            {
-                Console.WriteLine("test DNE");
-            }
-            else Console.WriteLine("test");
             Application.Run(walkerWindowObj);
         }
     }

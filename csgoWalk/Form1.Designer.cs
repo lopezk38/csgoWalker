@@ -140,7 +140,7 @@
             this.MaximizeBox = false;
             this.Name = "walkerWindow";
             this.Text = "CS:GO Walker";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Shown += new System.EventHandler(this.walkerWindow_Shown);
             this.bindGroup.ResumeLayout(false);
             this.consoleOutputBox.ResumeLayout(false);
             this.consoleOutputBox.PerformLayout();
