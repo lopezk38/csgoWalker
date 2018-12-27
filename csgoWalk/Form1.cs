@@ -13,8 +13,6 @@ namespace csgoWalk
     {
         public Feeder Feeder;
        
-
-
         public walkerWindow()
         {
             InitializeComponent();
@@ -29,6 +27,7 @@ namespace csgoWalk
 
         private void walkerWindow_Shown(object sender, EventArgs e)
         {
+            consoleBox.Select();
             Feeder = new Feeder();
         }
     }

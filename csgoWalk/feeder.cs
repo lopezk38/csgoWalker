@@ -181,7 +181,7 @@ namespace csgoWalk
                     Program.walkerWindowObj.ConsoleAddLine("vJoy Device " + id.ToString() + " is already owned by this feeder\n");
                     break;
                 case VjdStat.VJD_STAT_FREE:
-                    Program.walkerWindowObj.ConsoleAddLine("vJoy Device " + id.ToString() + "is free\n");
+                    Program.walkerWindowObj.ConsoleAddLine("vJoy Device " + id.ToString() + " is free\n");
                     break;
                 case VjdStat.VJD_STAT_BUSY:
                     Program.walkerWindowObj.ConsoleAddLine("vJoy Device " + id.ToString() + " is already owned by another feeder. Exiting...");
@@ -207,6 +207,8 @@ namespace csgoWalk
             if (AxisY) Program.walkerWindowObj.ConsoleAddLine("Y axis present: Yes");
             else Program.walkerWindowObj.ConsoleAddLine("Y axis present: No" + Environment.NewLine + "This will not work without the Y axis");
 
+            Program.walkerWindowObj.ConsoleAddLine(Environment.NewLine);
+
             // Test if DLL matches the driver
             UInt32 DllVer = 0, DrvVer = 0;
             bool match = joystick.DriverMatch(ref DllVer, ref DrvVer);
@@ -231,7 +233,7 @@ namespace csgoWalk
 
             var kbHook = new KeyboardHook(true);
             kbHook.KeyDown += KbHook_KeyDown;
-            kbHook.KeyUp += KbHook_KeyDown;
+            kbHook.KeyUp += KbHook_KeyUp;
 
             UpdateAnalogValue();
             Program.walkerWindowObj.ConsoleAddLine("Feeder initialized successfully");

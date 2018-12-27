@@ -40,13 +40,15 @@
             this.bindGroup = new System.Windows.Forms.GroupBox();
             this.consoleBox = new System.Windows.Forms.TextBox();
             this.consoleOutputBox = new System.Windows.Forms.GroupBox();
+            this.saveButton = new System.Windows.Forms.Button();
+            this.loadButton = new System.Windows.Forms.Button();
             this.bindGroup.SuspendLayout();
             this.consoleOutputBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // leftBind
             // 
-            this.leftBind.Location = new System.Drawing.Point(77, 14);
+            this.leftBind.Location = new System.Drawing.Point(62, 19);
             this.leftBind.Name = "leftBind";
             this.leftBind.Size = new System.Drawing.Size(50, 50);
             this.leftBind.TabIndex = 0;
@@ -55,7 +57,7 @@
             // 
             // downBind
             // 
-            this.downBind.Location = new System.Drawing.Point(77, 70);
+            this.downBind.Location = new System.Drawing.Point(62, 75);
             this.downBind.Name = "downBind";
             this.downBind.Size = new System.Drawing.Size(50, 50);
             this.downBind.TabIndex = 1;
@@ -64,7 +66,7 @@
             // 
             // rightBind
             // 
-            this.rightBind.Location = new System.Drawing.Point(133, 70);
+            this.rightBind.Location = new System.Drawing.Point(118, 75);
             this.rightBind.Name = "rightBind";
             this.rightBind.Size = new System.Drawing.Size(50, 50);
             this.rightBind.TabIndex = 2;
@@ -73,7 +75,7 @@
             // 
             // upBind
             // 
-            this.upBind.Location = new System.Drawing.Point(21, 70);
+            this.upBind.Location = new System.Drawing.Point(6, 75);
             this.upBind.Name = "upBind";
             this.upBind.Size = new System.Drawing.Size(50, 50);
             this.upBind.TabIndex = 3;
@@ -98,13 +100,15 @@
             // 
             // bindGroup
             // 
+            this.bindGroup.Controls.Add(this.loadButton);
+            this.bindGroup.Controls.Add(this.saveButton);
             this.bindGroup.Controls.Add(this.upBind);
             this.bindGroup.Controls.Add(this.rightBind);
             this.bindGroup.Controls.Add(this.downBind);
             this.bindGroup.Controls.Add(this.leftBind);
             this.bindGroup.Location = new System.Drawing.Point(12, 149);
             this.bindGroup.Name = "bindGroup";
-            this.bindGroup.Size = new System.Drawing.Size(205, 131);
+            this.bindGroup.Size = new System.Drawing.Size(343, 131);
             this.bindGroup.TabIndex = 4;
             this.bindGroup.TabStop = false;
             this.bindGroup.Text = "Set keybinds...";
@@ -117,7 +121,8 @@
             this.consoleBox.Multiline = true;
             this.consoleBox.Name = "consoleBox";
             this.consoleBox.ReadOnly = true;
-            this.consoleBox.Size = new System.Drawing.Size(192, 105);
+            this.consoleBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.consoleBox.Size = new System.Drawing.Size(331, 105);
             this.consoleBox.TabIndex = 5;
             // 
             // consoleOutputBox
@@ -125,16 +130,34 @@
             this.consoleOutputBox.Controls.Add(this.consoleBox);
             this.consoleOutputBox.Location = new System.Drawing.Point(12, 12);
             this.consoleOutputBox.Name = "consoleOutputBox";
-            this.consoleOutputBox.Size = new System.Drawing.Size(204, 126);
+            this.consoleOutputBox.Size = new System.Drawing.Size(343, 126);
             this.consoleOutputBox.TabIndex = 6;
             this.consoleOutputBox.TabStop = false;
             this.consoleOutputBox.Text = "Console";
+            // 
+            // saveButton
+            // 
+            this.saveButton.Location = new System.Drawing.Point(179, 19);
+            this.saveButton.Name = "saveButton";
+            this.saveButton.Size = new System.Drawing.Size(158, 50);
+            this.saveButton.TabIndex = 4;
+            this.saveButton.Text = "Save keybinds";
+            this.saveButton.UseVisualStyleBackColor = true;
+            // 
+            // loadButton
+            // 
+            this.loadButton.Location = new System.Drawing.Point(179, 75);
+            this.loadButton.Name = "loadButton";
+            this.loadButton.Size = new System.Drawing.Size(158, 50);
+            this.loadButton.TabIndex = 5;
+            this.loadButton.Text = "Load keybinds";
+            this.loadButton.UseVisualStyleBackColor = true;
             // 
             // walkerWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(229, 291);
+            this.ClientSize = new System.Drawing.Size(367, 291);
             this.Controls.Add(this.consoleOutputBox);
             this.Controls.Add(this.bindGroup);
             this.MaximizeBox = false;
@@ -161,6 +184,8 @@
         private System.Windows.Forms.GroupBox bindGroup;
         private System.Windows.Forms.TextBox consoleBox;
         private System.Windows.Forms.GroupBox consoleOutputBox;
+        private System.Windows.Forms.Button loadButton;
+        private System.Windows.Forms.Button saveButton;
     }
 }
 
