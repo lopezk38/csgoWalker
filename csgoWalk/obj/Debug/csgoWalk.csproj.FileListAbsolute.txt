@@ -9,3 +9,5 @@ D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.csp
 D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.csproj.CopyComplete
 D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.exe
 D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\obj\Debug\csgoWalk.pdb
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\bin\Debug\csgoWalk.exe.config
+D:\Documents\vJoy218SDK-291116\csgoWalk\csgoWalk\csgoWalk\bin\Debug\RawInput.dll

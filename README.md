@@ -18,4 +18,17 @@ That command switches the way CS:GO maps analog position to player movement so t
 
 The only real downside I found to this method is that if you turn your mouse too quickly (such as to flick at a head at the edge of your screen), you could unintentionally strafe. Strafing in most Source engine games including CS:GO causes your character to gain speed (Which is why strafe jumps are used to jump further than normal distances or to gain speed while bhopping) which will put you above 135 units/s if you aren't careful. Make slow turns or hold the walk key while making sharp turns to avoid this.
 
-This version compiles and works, but does not recieve keyboard data while CS:GO is opened. The next version is going to have a different method of recieving keyboard input. Some of the buttons in the UI do not work either yet
+This is the first functional build. UI functions aside from console are not functional yet. 
+
+External Dependancies:
+
+	https://sourceforge.net/projects/vjoystick/files/latest/download
+	
+	
+Installation:
+
+	Step 1. Install dependancies.
+	Step 2. "Run C:\Program Files\vJoy\x64\vJoyConf.exe" and make sure the X and Y axes are enabled. You may disable everything else. Make sure Enable vJoy is checked.
+	Step 3. Run the binary in "csgoWalk\bin\Debug\csgoWalk.exe"
+	Step 4. Enable joystick in CS:GO settings
+	Step 5. Run "joy_response_move 0" in CS:GO console

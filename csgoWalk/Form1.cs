@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace csgoWalk
@@ -12,7 +7,8 @@ namespace csgoWalk
     public partial class walkerWindow : Form
     {
         public Feeder Feeder;
-       
+        public IntPtr HWND;
+
         public walkerWindow()
         {
             InitializeComponent();
@@ -27,6 +23,9 @@ namespace csgoWalk
 
         private void walkerWindow_Shown(object sender, EventArgs e)
         {
+
+            HWND = this.Handle;
+            Console.WriteLine(HWND);
             consoleBox.Select();
             Feeder = new Feeder();
         }
