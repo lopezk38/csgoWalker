@@ -18,4 +18,4 @@ That command switches the way CS:GO maps analog position to player movement so t
 
 The only real downside I found to this method is that if you turn your mouse too quickly (such as to flick at a head at the edge of your screen), you could unintentionally strafe. Strafing in most Source engine games including CS:GO causes your character to gain speed (Which is why strafe jumps are used to jump further than normal distances or to gain speed while bhopping) which will put you above 135 units/s if you aren't careful. Make slow turns or hold the walk key while making sharp turns to avoid this.
 
-This is a work in progress. It does not currently work. It probably doesn't even compile yet.
+This version compiles and works, but does not recieve keyboard data while CS:GO is opened. The next version is going to have a different method of recieving keyboard input. Some of the buttons in the UI do not work either yet
