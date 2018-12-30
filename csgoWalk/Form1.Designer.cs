@@ -29,31 +29,31 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.leftBind = new System.Windows.Forms.Button();
+            this.upBind = new System.Windows.Forms.Button();
             this.downBind = new System.Windows.Forms.Button();
             this.rightBind = new System.Windows.Forms.Button();
-            this.upBind = new System.Windows.Forms.Button();
+            this.leftBind = new System.Windows.Forms.Button();
             this.upBindHint = new System.Windows.Forms.ToolTip(this.components);
             this.bindLeftHint = new System.Windows.Forms.ToolTip(this.components);
             this.bindDownHint = new System.Windows.Forms.ToolTip(this.components);
             this.bindRightHint = new System.Windows.Forms.ToolTip(this.components);
             this.bindGroup = new System.Windows.Forms.GroupBox();
+            this.loadButton = new System.Windows.Forms.Button();
+            this.saveButton = new System.Windows.Forms.Button();
             this.consoleBox = new System.Windows.Forms.TextBox();
             this.consoleOutputBox = new System.Windows.Forms.GroupBox();
-            this.saveButton = new System.Windows.Forms.Button();
-            this.loadButton = new System.Windows.Forms.Button();
             this.bindGroup.SuspendLayout();
             this.consoleOutputBox.SuspendLayout();
             this.SuspendLayout();
             // 
-            // leftBind
+            // upBind
             // 
-            this.leftBind.Location = new System.Drawing.Point(62, 19);
-            this.leftBind.Name = "leftBind";
-            this.leftBind.Size = new System.Drawing.Size(50, 50);
-            this.leftBind.TabIndex = 0;
-            this.leftBind.Text = "Left";
-            this.leftBind.UseVisualStyleBackColor = true;
+            this.upBind.Location = new System.Drawing.Point(62, 19);
+            this.upBind.Name = "upBind";
+            this.upBind.Size = new System.Drawing.Size(50, 50);
+            this.upBind.TabIndex = 0;
+            this.upBind.Text = "Up";
+            this.upBind.UseVisualStyleBackColor = true;
             // 
             // downBind
             // 
@@ -73,14 +73,14 @@
             this.rightBind.Text = "Right";
             this.rightBind.UseVisualStyleBackColor = true;
             // 
-            // upBind
+            // leftBind
             // 
-            this.upBind.Location = new System.Drawing.Point(6, 75);
-            this.upBind.Name = "upBind";
-            this.upBind.Size = new System.Drawing.Size(50, 50);
-            this.upBind.TabIndex = 3;
-            this.upBind.Text = "Up";
-            this.upBind.UseVisualStyleBackColor = true;
+            this.leftBind.Location = new System.Drawing.Point(6, 75);
+            this.leftBind.Name = "leftBind";
+            this.leftBind.Size = new System.Drawing.Size(50, 50);
+            this.leftBind.TabIndex = 3;
+            this.leftBind.Text = "Left";
+            this.leftBind.UseVisualStyleBackColor = true;
             // 
             // upBindHint
             // 
@@ -102,16 +102,34 @@
             // 
             this.bindGroup.Controls.Add(this.loadButton);
             this.bindGroup.Controls.Add(this.saveButton);
-            this.bindGroup.Controls.Add(this.upBind);
+            this.bindGroup.Controls.Add(this.leftBind);
             this.bindGroup.Controls.Add(this.rightBind);
             this.bindGroup.Controls.Add(this.downBind);
-            this.bindGroup.Controls.Add(this.leftBind);
+            this.bindGroup.Controls.Add(this.upBind);
             this.bindGroup.Location = new System.Drawing.Point(12, 149);
             this.bindGroup.Name = "bindGroup";
             this.bindGroup.Size = new System.Drawing.Size(343, 131);
             this.bindGroup.TabIndex = 4;
             this.bindGroup.TabStop = false;
             this.bindGroup.Text = "Set keybinds...";
+            // 
+            // loadButton
+            // 
+            this.loadButton.Location = new System.Drawing.Point(179, 75);
+            this.loadButton.Name = "loadButton";
+            this.loadButton.Size = new System.Drawing.Size(158, 50);
+            this.loadButton.TabIndex = 5;
+            this.loadButton.Text = "Load keybinds";
+            this.loadButton.UseVisualStyleBackColor = true;
+            // 
+            // saveButton
+            // 
+            this.saveButton.Location = new System.Drawing.Point(179, 19);
+            this.saveButton.Name = "saveButton";
+            this.saveButton.Size = new System.Drawing.Size(158, 50);
+            this.saveButton.TabIndex = 4;
+            this.saveButton.Text = "Save keybinds";
+            this.saveButton.UseVisualStyleBackColor = true;
             // 
             // consoleBox
             // 
@@ -135,24 +153,6 @@
             this.consoleOutputBox.TabStop = false;
             this.consoleOutputBox.Text = "Console";
             // 
-            // saveButton
-            // 
-            this.saveButton.Location = new System.Drawing.Point(179, 19);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(158, 50);
-            this.saveButton.TabIndex = 4;
-            this.saveButton.Text = "Save keybinds";
-            this.saveButton.UseVisualStyleBackColor = true;
-            // 
-            // loadButton
-            // 
-            this.loadButton.Location = new System.Drawing.Point(179, 75);
-            this.loadButton.Name = "loadButton";
-            this.loadButton.Size = new System.Drawing.Size(158, 50);
-            this.loadButton.TabIndex = 5;
-            this.loadButton.Text = "Load keybinds";
-            this.loadButton.UseVisualStyleBackColor = true;
-            // 
             // walkerWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -173,10 +173,10 @@
 
         #endregion
 
-        private System.Windows.Forms.Button leftBind;
+        private System.Windows.Forms.Button upBind;
         private System.Windows.Forms.Button downBind;
         private System.Windows.Forms.Button rightBind;
-        private System.Windows.Forms.Button upBind;
+        private System.Windows.Forms.Button leftBind;
         private System.Windows.Forms.ToolTip upBindHint;
         private System.Windows.Forms.ToolTip bindLeftHint;
         private System.Windows.Forms.ToolTip bindDownHint;

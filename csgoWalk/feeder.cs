@@ -152,10 +152,10 @@ namespace csgoWalk
         {
             keyBinds = new Dictionary<uint, uint>(4)
             {
-                {0x54, KEY_FORWARD}, //https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
-                {0x48, KEY_RIGHT},
-                {0x47, KEY_BACKWARD},
-                {0x46, KEY_LEFT}
+                {0x26, KEY_FORWARD}, //https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
+                {0x27, KEY_RIGHT},
+                {0x28, KEY_BACKWARD},
+                {0x25, KEY_LEFT}
             };
         }
 
