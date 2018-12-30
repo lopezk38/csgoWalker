@@ -42,3 +42,5 @@ Installation:
 Other notes:
 
 	You can use joy_forwardthreshold "0.1" to adjust the speed at which you move. A value of "0.1" will make you move at 130 units/second while "0.15" will make you move at 112 units/s
+	
+	By default, the keybinds are TFGH

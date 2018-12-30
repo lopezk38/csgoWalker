@@ -17,20 +17,58 @@ namespace csgoWalk
 
         private const int centerVal = 16383;
         private const int offsetVal = 5926;
-        private static readonly int[] lookUp = new int[] {centerVal, centerVal + offsetVal, centerVal - offsetVal, centerVal}; //c# can't define arrays at compile time why
+        private static readonly int[] lookUpX = new int[] 
+        {centerVal,
+         centerVal,
+         centerVal,
+         centerVal,
+         centerVal + offsetVal,
+         centerVal + (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal + (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal + offsetVal,
+         centerVal - offsetVal,
+         centerVal - (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal - (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal - offsetVal,
+         centerVal,
+         centerVal,
+         centerVal,
+         centerVal};
 
-        private static byte leftRightKeyDown = 0b00; // msb = left, lsb = right
-        private static byte forwardBackKeyDown = 0b00; //msb = forward, lsb = backwards
+        private static readonly int[] lookUpY = new int[] 
+        {centerVal,
+         centerVal + offsetVal,
+         centerVal - offsetVal,
+         centerVal,
+         centerVal,
+         centerVal + (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal - (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal,
+         centerVal,
+         centerVal + (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal - (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal,
+         centerVal,
+         centerVal + offsetVal,
+         centerVal - offsetVal,
+         centerVal};
 
-        private const byte leftForwardMask = 0b01;
-        private const byte rightBackwardMask = 0b10;
-        private const byte leftForwardSetBit = rightBackwardMask;
-        private const byte rightBackwardSetBit = leftForwardMask;
+        private static byte keysDown = 0b0000; // left, right, up, down
 
         private const uint KEY_FORWARD = 0;
         private const uint KEY_RIGHT = 1;
         private const uint KEY_BACKWARD = 2;
         private const uint KEY_LEFT = 3;
+
+        private const uint FORWARD_OR = 0b0010;
+        private const uint RIGHT_OR = 0b0100;
+        private const uint BACKWARD_OR = 0b0001;
+        private const uint LEFT_OR = 0b1000;
+
+        private const uint FORWARD_AND = 0b1101;
+        private const uint RIGHT_AND = 0b1011;
+        private const uint BACKWARD_AND = 0b1110;
+        private const uint LEFT_AND = 0b0111;
 
         private static Dictionary<uint, uint> keyBinds;
 
@@ -42,20 +80,20 @@ namespace csgoWalk
                 switch (direction)
                 {
                     case KEY_FORWARD:
-                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) forwardBackKeyDown = (byte)(forwardBackKeyDown | leftForwardSetBit);
-                        else forwardBackKeyDown = (byte)(forwardBackKeyDown & leftForwardMask);
+                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) keysDown = (byte)(keysDown | FORWARD_OR);
+                        else keysDown = (byte)(keysDown & FORWARD_AND);
                         break;
                     case KEY_RIGHT:
-                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) leftRightKeyDown = (byte)(leftRightKeyDown | rightBackwardSetBit);
-                        else leftRightKeyDown = (byte)(leftRightKeyDown & rightBackwardMask);
+                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) keysDown = (byte)(keysDown | RIGHT_OR);
+                        else keysDown = (byte)(keysDown & RIGHT_AND);
                         break;
                     case KEY_BACKWARD:
-                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) forwardBackKeyDown = (byte)(forwardBackKeyDown | rightBackwardSetBit);
-                        else forwardBackKeyDown = (byte)(forwardBackKeyDown & rightBackwardMask);
+                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) keysDown = (byte)(keysDown | BACKWARD_OR);
+                        else keysDown = (byte)(keysDown & BACKWARD_AND);
                         break;
                     case KEY_LEFT:
-                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) leftRightKeyDown = (byte)(leftRightKeyDown | leftForwardSetBit);
-                        else leftRightKeyDown = (byte)(leftRightKeyDown & leftForwardMask);
+                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) keysDown = (byte)(keysDown | LEFT_OR);
+                        else keysDown = (byte)(keysDown & LEFT_AND);
                         break;
                 }
                 UpdateAnalogValue();
@@ -65,8 +103,8 @@ namespace csgoWalk
         private static void UpdateAnalogValue()
         {
             iReport.bDevice = (byte)id;
-            iReport.AxisX = lookUp[leftRightKeyDown];
-            iReport.AxisY = lookUp[forwardBackKeyDown];
+            iReport.AxisX = lookUpX[keysDown];
+            iReport.AxisY = lookUpY[keysDown];
 
             /*
             if (((byte)(leftRightKeyDown & forwardBackKeyDown)) == (byte)0x11) iReport.Buttons = (uint)(0x1000);
@@ -85,22 +123,22 @@ namespace csgoWalk
             switch (direction)
             {
                 case "left":
-                    leftRightKeyDown = (byte)(leftRightKeyDown & leftForwardMask);
+                    keysDown = (byte)(keysDown & 0x0111);
                     DeleteKeyVal(ref keyBinds, KEY_LEFT);
                     keyBinds.Add(key, KEY_LEFT);
                     break;
                 case "right":
-                    leftRightKeyDown = (byte)(leftRightKeyDown & rightBackwardMask);
+                    keysDown = (byte)(keysDown & 0x1011);
                     DeleteKeyVal(ref keyBinds, KEY_RIGHT);
                     keyBinds.Add(key, KEY_RIGHT);
                     break;
                 case "forward":
-                    forwardBackKeyDown = (byte)(forwardBackKeyDown & leftForwardMask);
+                    keysDown = (byte)(keysDown & 0x1101);
                     DeleteKeyVal(ref keyBinds, KEY_FORWARD);
                     keyBinds.Add(key, KEY_FORWARD);
                     break;
                 case "backward":
-                    forwardBackKeyDown = (byte)(forwardBackKeyDown & rightBackwardMask);
+                    keysDown = (byte)(keysDown & 0x1110);
                     DeleteKeyVal(ref keyBinds, KEY_BACKWARD);
                     keyBinds.Add(key, KEY_BACKWARD);
                     break;
@@ -114,10 +152,10 @@ namespace csgoWalk
         {
             keyBinds = new Dictionary<uint, uint>(4)
             {
-                {0x26, KEY_FORWARD}, //https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
-                {0x27, KEY_RIGHT},
-                {0x28, KEY_BACKWARD},
-                {0x25, KEY_LEFT}
+                {0x54, KEY_FORWARD}, //https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
+                {0x48, KEY_RIGHT},
+                {0x47, KEY_BACKWARD},
+                {0x46, KEY_LEFT}
             };
         }
 
