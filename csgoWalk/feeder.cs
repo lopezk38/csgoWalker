@@ -68,6 +68,11 @@ namespace csgoWalk
             iReport.AxisX = lookUp[leftRightKeyDown];
             iReport.AxisY = lookUp[forwardBackKeyDown];
 
+            /*
+            if (((byte)(leftRightKeyDown & forwardBackKeyDown)) == (byte)0x11) iReport.Buttons = (uint)(0x1000);
+            else iReport.Buttons = (uint)(0x0000);
+            */
+
             if (!joystick.UpdateVJD(id, ref iReport))
             {
                 Program.walkerWindowObj.ConsoleAddLine("Feeding vJoy device number " + id.ToString() + " failed - Is the device enabled?");
@@ -216,6 +221,7 @@ namespace csgoWalk
             kbHook.CaptureOnlyIfTopMostWindow = false;
             kbHook.KeyPressed += KbHook_KeyPress;
 
+            iReport.Buttons = (uint)(0x0000);
             UpdateAnalogValue();
             Program.walkerWindowObj.ConsoleAddLine("Feeder initialized successfully");
         }
