@@ -51,6 +51,7 @@
     <Reference Include="vJoyInterfaceWrap">
       <HintPath>..\..\..\SDK\c#\x64\vJoyInterfaceWrap.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="feeder.cs" />

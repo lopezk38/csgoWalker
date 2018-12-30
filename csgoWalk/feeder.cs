@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using vJoyInterfaceWrap;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using RawInput_dll; //From https://www.codeproject.com/Articles/17123/%2FArticles%2F17123%2FUsing-Raw-Input-from-C-to-handle-multiple-keyboard
 
 namespace csgoWalk
@@ -16,19 +13,21 @@ namespace csgoWalk
         static public uint id = 1;
 
         private const int centerVal = 16383;
-        private const int offsetVal = 5926;
+        private const int offsetVal = 5750;
+
+        //centerVal + (int)(offsetVal * (Math.Sqrt(2)/2))
         private static readonly int[] lookUpX = new int[] 
         {centerVal,
          centerVal,
          centerVal,
          centerVal,
          centerVal + offsetVal,
-         centerVal + (int)(offsetVal * (Math.Sqrt(2)/2)),
-         centerVal + (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal + (int)(offsetVal/1.3),
+         centerVal + (int)(offsetVal/1.3),
          centerVal + offsetVal,
          centerVal - offsetVal,
-         centerVal - (int)(offsetVal * (Math.Sqrt(2)/2)),
-         centerVal - (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal - (int)(offsetVal/1.3),
+         centerVal - (int)(offsetVal/1.3),
          centerVal - offsetVal,
          centerVal,
          centerVal,
@@ -41,12 +40,12 @@ namespace csgoWalk
          centerVal - offsetVal,
          centerVal,
          centerVal,
-         centerVal + (int)(offsetVal * (Math.Sqrt(2)/2)),
-         centerVal - (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal + (int)(offsetVal/1.3),
+         centerVal - (int)(offsetVal/1.3),
          centerVal,
          centerVal,
-         centerVal + (int)(offsetVal * (Math.Sqrt(2)/2)),
-         centerVal - (int)(offsetVal * (Math.Sqrt(2)/2)),
+         centerVal + (int)(offsetVal/1.3),
+         centerVal - (int)(offsetVal/1.3),
          centerVal,
          centerVal,
          centerVal + offsetVal,
@@ -70,6 +69,8 @@ namespace csgoWalk
         private const uint BACKWARD_AND = 0b1110;
         private const uint LEFT_AND = 0b0111;
 
+        private const uint GET_LSB = BACKWARD_OR;
+
         private static Dictionary<uint, uint> keyBinds;
 
         private static void KbHook_KeyPress(object sender, InputEventArg e)
@@ -77,31 +78,19 @@ namespace csgoWalk
             uint direction;
             if (keyBinds.TryGetValue((uint)e.KeyPressEvent.VKey, out direction))
             {
-                switch (direction)
-                {
-                    case KEY_FORWARD:
-                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) keysDown = (byte)(keysDown | FORWARD_OR);
-                        else keysDown = (byte)(keysDown & FORWARD_AND);
-                        break;
-                    case KEY_RIGHT:
-                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) keysDown = (byte)(keysDown | RIGHT_OR);
-                        else keysDown = (byte)(keysDown & RIGHT_AND);
-                        break;
-                    case KEY_BACKWARD:
-                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) keysDown = (byte)(keysDown | BACKWARD_OR);
-                        else keysDown = (byte)(keysDown & BACKWARD_AND);
-                        break;
-                    case KEY_LEFT:
-                        if (e.KeyPressEvent.Message == Win32.WM_KEYDOWN) keysDown = (byte)(keysDown | LEFT_OR);
-                        else keysDown = (byte)(keysDown & LEFT_AND);
-                        break;
-                }
-                UpdateAnalogValue();
+                UpdateKeysDown(direction, e.KeyPressEvent.Message);
             }
         }
 
         private static void UpdateAnalogValue()
         {
+            iReport.bDevice = (byte)id;
+            iReport.AxisX = centerVal;
+            iReport.AxisY = centerVal;
+            joystick.UpdateVJD(id, ref iReport);
+
+            System.Threading.Thread.Sleep(60); //prevent single footstep during transition
+
             iReport.bDevice = (byte)id;
             iReport.AxisX = lookUpX[keysDown];
             iReport.AxisY = lookUpY[keysDown];
@@ -115,6 +104,41 @@ namespace csgoWalk
             {
                 Program.walkerWindowObj.ConsoleAddLine("Feeding vJoy device number " + id.ToString() + " failed - Is the device enabled?");
                 joystick.AcquireVJD(id);
+            }
+        }
+
+        private static void UpdateKeysDown(uint direction, uint keyDownMes)
+        {
+            bool keyDown;
+            if (keyDownMes == Win32.WM_KEYDOWN) keyDown = true;
+            else keyDown = false;
+
+            switch (direction)
+            {
+                case KEY_FORWARD:
+                    if (keyDown == Convert.ToBoolean((keysDown >> 1) & GET_LSB)) break;
+                    if (keyDown) {keysDown = (byte)(keysDown | FORWARD_OR);}
+                    else {keysDown = (byte)(keysDown & FORWARD_AND);}
+                    UpdateAnalogValue();
+                    break;
+                case KEY_RIGHT:
+                    if (keyDown == Convert.ToBoolean((keysDown >> 2) & GET_LSB)) break;
+                    if (keyDown) {keysDown = (byte)(keysDown | RIGHT_OR);}
+                    else {keysDown = (byte)(keysDown & RIGHT_AND);}
+                    UpdateAnalogValue();
+                    break;
+                case KEY_BACKWARD:
+                    if (keyDown == Convert.ToBoolean(keysDown & GET_LSB)) break;
+                    if (keyDown) {keysDown = (byte)(keysDown | BACKWARD_OR);}
+                    else {keysDown = (byte)(keysDown & BACKWARD_AND);}
+                    UpdateAnalogValue();
+                    break;
+                case KEY_LEFT:
+                    if (keyDown == Convert.ToBoolean((keysDown >> 3) & GET_LSB)) break;
+                    if (keyDown) {keysDown = (byte)(keysDown | LEFT_OR);}
+                    else {keysDown = (byte)(keysDown & LEFT_AND);}
+                    UpdateAnalogValue();
+                    break;
             }
         }
 
@@ -148,14 +172,53 @@ namespace csgoWalk
             return;
         }
 
+        public int GetKeyBind(uint direction)
+        {
+            foreach (KeyValuePair<uint, uint> pair in keyBinds)
+            {
+                if (pair.Value == direction)
+                {
+                    return (int)pair.Key;
+                }
+            }
+            return -1;
+        }
+
+        public int GetKeyBind(string strDir)
+        {
+            uint dir = 0xFFFF;
+            switch (strDir)
+            {
+                case "forward":
+                    dir = KEY_FORWARD;
+                    break;
+                case "right":
+                    dir = KEY_RIGHT;
+                    break;
+                case "backward":
+                    dir = KEY_BACKWARD;
+                    break;
+                case "left":
+                    dir = KEY_LEFT;
+                    break;
+                default:
+                    break;
+            }
+            if (dir == 0xFFFF)
+            {
+                return -1;
+            }
+            return GetKeyBind(strDir);
+        }
+
         public Feeder() : this(1) //calls uint constructor with args of 1
         {
             keyBinds = new Dictionary<uint, uint>(4)
             {
-                {0x26, KEY_FORWARD}, //https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
-                {0x27, KEY_RIGHT},
-                {0x28, KEY_BACKWARD},
-                {0x25, KEY_LEFT}
+                {0x57, KEY_FORWARD}, //https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
+                {0x44, KEY_RIGHT},
+                {0x53, KEY_BACKWARD},
+                {0x41, KEY_LEFT}
             };
         }
 
@@ -255,8 +318,10 @@ namespace csgoWalk
 
             joystick.GetVJDAxisMax(id, HID_USAGES.HID_USAGE_X, ref maxVal);
 
-            RawInput kbHook = new RawInput(Program.walkerWindowObj.HWND);
-            kbHook.CaptureOnlyIfTopMostWindow = false;
+            RawInput kbHook = new RawInput(Program.walkerWindowObj.HWND)
+            {
+                CaptureOnlyIfTopMostWindow = false
+            };
             kbHook.KeyPressed += KbHook_KeyPress;
 
             iReport.Buttons = (uint)(0x0000);

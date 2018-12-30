@@ -48,39 +48,47 @@
             // 
             // upBind
             // 
+            this.upBind.BackColor = System.Drawing.SystemColors.ControlLight;
             this.upBind.Location = new System.Drawing.Point(62, 19);
             this.upBind.Name = "upBind";
             this.upBind.Size = new System.Drawing.Size(50, 50);
             this.upBind.TabIndex = 0;
             this.upBind.Text = "Up";
-            this.upBind.UseVisualStyleBackColor = true;
+            this.upBind.UseVisualStyleBackColor = false;
+            this.upBind.Click += new System.EventHandler(this.upBind_Click);
             // 
             // downBind
             // 
+            this.downBind.BackColor = System.Drawing.SystemColors.ControlLight;
             this.downBind.Location = new System.Drawing.Point(62, 75);
             this.downBind.Name = "downBind";
             this.downBind.Size = new System.Drawing.Size(50, 50);
             this.downBind.TabIndex = 1;
             this.downBind.Text = "Down";
-            this.downBind.UseVisualStyleBackColor = true;
+            this.downBind.UseVisualStyleBackColor = false;
+            this.downBind.Click += new System.EventHandler(this.downBind_Click);
             // 
             // rightBind
             // 
+            this.rightBind.BackColor = System.Drawing.SystemColors.ControlLight;
             this.rightBind.Location = new System.Drawing.Point(118, 75);
             this.rightBind.Name = "rightBind";
             this.rightBind.Size = new System.Drawing.Size(50, 50);
             this.rightBind.TabIndex = 2;
             this.rightBind.Text = "Right";
-            this.rightBind.UseVisualStyleBackColor = true;
+            this.rightBind.UseVisualStyleBackColor = false;
+            this.rightBind.Click += new System.EventHandler(this.rightBind_Click);
             // 
             // leftBind
             // 
+            this.leftBind.BackColor = System.Drawing.SystemColors.ControlLight;
             this.leftBind.Location = new System.Drawing.Point(6, 75);
             this.leftBind.Name = "leftBind";
             this.leftBind.Size = new System.Drawing.Size(50, 50);
             this.leftBind.TabIndex = 3;
             this.leftBind.Text = "Left";
-            this.leftBind.UseVisualStyleBackColor = true;
+            this.leftBind.UseVisualStyleBackColor = false;
+            this.leftBind.Click += new System.EventHandler(this.leftBind_Click);
             // 
             // upBindHint
             // 
@@ -115,21 +123,25 @@
             // 
             // loadButton
             // 
+            this.loadButton.BackColor = System.Drawing.SystemColors.ControlLight;
             this.loadButton.Location = new System.Drawing.Point(179, 75);
             this.loadButton.Name = "loadButton";
             this.loadButton.Size = new System.Drawing.Size(158, 50);
             this.loadButton.TabIndex = 5;
             this.loadButton.Text = "Load keybinds";
-            this.loadButton.UseVisualStyleBackColor = true;
+            this.loadButton.UseVisualStyleBackColor = false;
+            this.loadButton.Click += new System.EventHandler(this.loadButton_Click);
             // 
             // saveButton
             // 
+            this.saveButton.BackColor = System.Drawing.SystemColors.ControlLight;
             this.saveButton.Location = new System.Drawing.Point(179, 19);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(158, 50);
             this.saveButton.TabIndex = 4;
             this.saveButton.Text = "Save keybinds";
-            this.saveButton.UseVisualStyleBackColor = true;
+            this.saveButton.UseVisualStyleBackColor = false;
+            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
             // 
             // consoleBox
             // 
@@ -157,6 +169,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(367, 291);
             this.Controls.Add(this.consoleOutputBox);
             this.Controls.Add(this.bindGroup);
