@@ -30,6 +30,6 @@ Installation:
 	Step 5. Add "exec analogWalk.cfg" to your autoexec.cfg or run it in console whenever you want to use the binds
 	
 Other notes:
-	You can use joy_forwardthreshold "0.1" to adjust the speed at which you move. A value of "0.1" will make you move at 130 units/second while "0.15" will make you move at 112 units/s
+	You can use joy_forwardthreshold "0.1" to adjust the speed at which you move. A value of "0.1" will make you move at 125 units/second while "0.15" will make you move at 110ish units/s
 	
 	By default, the keybinds are WASD and overrides the default CS:GO walking bind with it's own
