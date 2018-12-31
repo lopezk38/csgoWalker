@@ -6,6 +6,7 @@ using System.Threading;
 using System.Drawing;
 using RawInput_dll; //From https://www.codeproject.com/Articles/17123/%2FArticles%2F17123%2FUsing-Raw-Input-from-C-to-handle-multiple-keyboard
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace csgoWalk
 {
@@ -92,6 +93,12 @@ namespace csgoWalk
             waitForFeeder.Set();
         }
 
+        private void CreateNewFeeder(uint id, Dictionary<uint, uint> dic)
+        {
+            Feeder = new Feeder(id, dic);
+            waitForFeeder.Set();
+        }
+
         private void LoadSavedBinds()
         {
             consoleBox.Invoke(new Action(() => ConsoleAddLine("Loading saved keybinds...")));
@@ -110,52 +117,190 @@ namespace csgoWalk
                 uint[] parsedXmlOut = new uint[NODE_COUNT];
                 XmlDocument saveDataxml = new XmlDocument();
                 saveDataxml.Load(saveDataPath);
-                for (int i = 0; i < NODE_COUNT; ++i)
-                {
-                    xmlOut[i] = saveDataxml.DocumentElement.ChildNodes[i].InnerText;
-                }
 
                 for (int i = 0; i < NODE_COUNT; ++i)
                 {
-                    int curData = Int32.Parse(xmlOut[i]);
-                    string curString = System.Windows.Input.KeyInterop.KeyFromVirtualKey(curData).ToString("G"); //"G" for general format. Look up enum format strings
-                    if (curData >= 0x08 && curData <= 0xFE && curData != 0x07 && curData != 0x0A && curData != 0x0B && curData != 0x0E && curData != 0x0F && curData != 0x16 &&
-                        curData != 0x1A && curData != 0x5E && curData != 0xB8 && curData != 0xB9 && curData != 0xE0 && curData != 0xE8 && curData != 0xFC && !(curData >= 0x3A &&
-                        curData <= 0x40) && !(curData >= 0x88 && curData <= 0x8F) && !(curData >= 0x97 && curData <= 0x9F) && !(curData >= 0xC1 && curData <= 0xDA))
-                    { //Key exists/isn't blacklisted
-                        switch (i)
-                        {
-                            case KEY_FORWARD:
-                                Feeder.SetKeyBind("forward", (uint)curData);
-                                consoleBox.Invoke(new Action(() => upBind.Text = curString));
-                                break;
-                            case KEY_RIGHT:
-                                Feeder.SetKeyBind("right", (uint)curData);
-                                consoleBox.Invoke(new Action(() => rightBind.Text = curString));
-                                break;
-                            case KEY_BACKWARD:
-                                Feeder.SetKeyBind("backward", (uint)curData);
-                                consoleBox.Invoke(new Action(() => downBind.Text = curString));
-                                break;
-                            case KEY_LEFT:
-                                Feeder.SetKeyBind("left", (uint)curData);
-                                consoleBox.Invoke(new Action(() => leftBind.Text = curString));
-                                break;
-                            default:
-                                break;
-                        }
+                    int curData = Int32.Parse(saveDataxml.DocumentElement.ChildNodes[i].InnerText);
+                    string curString = GetKeyName((uint)curData);
+                    if (IsValidKey((uint)i, (uint)curData))
+                    {
+                        SetKeyBind((uint)i, (uint)curData);
                     }
                     else
                     {
-                        consoleBox.Invoke(new Action(() => ConsoleAddLine("Invalid keycode for direction" + i.ToString())));
+                        consoleBox.Invoke(new Action(() => ConsoleAddLine("Invalid keycode for direction " + i.ToString())));
                     }
                 }
             }
             else
             {
                 //file does not exist
+                consoleBox.Invoke(new Action(() => ConsoleAddLine("No save file to load from. Creating one...")));
                 CreateNewSaveFile();
             }
+        }
+
+        private uint StringDirToUint(string dir)
+        {
+            switch (dir)
+            {
+                case "forward":
+                    return KEY_FORWARD;
+                case "right":
+                    return KEY_RIGHT;
+                case "backward":
+                    return KEY_BACKWARD;
+                case "left":
+                    return KEY_LEFT;
+                default:
+                    return 0xFFFF;
+            }
+        }
+
+        private string UintDirToString(uint dir)
+        {
+            switch (dir)
+            {
+                case KEY_FORWARD:
+                    return "forward";
+                case KEY_BACKWARD:
+                    return "backward";
+                case KEY_LEFT:
+                    return "left";
+                case KEY_RIGHT:
+                    return "right";
+                default:
+                    return "";
+            }
+        }
+
+        private void SetKeyBind(string dir, uint key)
+        {
+            Feeder.SetKeyBind(dir, key);
+            string curString = GetKeyName(key);
+            switch (dir)
+            {
+                case "forward":
+                    consoleBox.Invoke(new Action(() => upBind.Text = curString));
+                    break;
+                case "right":
+                    consoleBox.Invoke(new Action(() => rightBind.Text = curString));
+                    break;
+                case "backward":
+                    consoleBox.Invoke(new Action(() => downBind.Text = curString));
+                    break;
+                case "left":
+                    consoleBox.Invoke(new Action(() => leftBind.Text = curString));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void SetKeyBind(uint dir, uint key)
+        {
+            Feeder.SetKeyBind(dir, key);
+            string curString = GetKeyName(key);
+            switch (dir)
+            {
+                case KEY_FORWARD:
+                    consoleBox.Invoke(new Action(() => upBind.Text = curString));
+                    break;
+                case KEY_RIGHT:
+                    consoleBox.Invoke(new Action(() => rightBind.Text = curString));
+                    break;
+                case KEY_BACKWARD:
+                    consoleBox.Invoke(new Action(() => downBind.Text = curString));
+                    break;
+                case KEY_LEFT:
+                    consoleBox.Invoke(new Action(() => leftBind.Text = curString));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private uint GetDefaultKey(string dir)
+        {
+            return GetDefaultKey(StringDirToUint(dir));
+        }
+
+        private uint GetDefaultKey(uint dir)
+        {
+            switch (dir)
+            {
+                case KEY_FORWARD:
+                    return 0x57;
+                case KEY_RIGHT:
+                    return 0x44;
+                case KEY_BACKWARD:
+                    return 0x53;
+                case KEY_LEFT:
+                    return 0x41;
+                default:
+                    return 0xFFFF;
+            }
+        }
+
+        private uint GetKeyBind(string dir)
+        {
+            return GetKeyBind(StringDirToUint(dir));
+        }
+
+        private uint GetKeyBind(uint dir)
+        {
+            int result = Feeder.GetKeyBind(dir);
+            if (result == -1)
+            {
+                return GetDefaultKey(dir);
+            }
+            return (uint)result;
+        }
+
+        private bool IsValidKey(uint keyDir, uint key)
+        {
+            bool isKeyValid = true;
+            if (key >= 0x08 && key <= 0xFE && key != 0x07 && key != 0x0A && key != 0x0B && key != 0x0E && key != 0x0F && key != 0x16 &&
+                key != 0x1A && key != 0x5E && key != 0xB8 && key != 0xB9 && key != 0xE0 && key != 0xE8 && key != 0xFC && !(key >= 0x3A &&
+                key <= 0x40) && !(key >= 0x88 && key <= 0x8F) && !(key >= 0x97 && key <= 0x9F) && !(key >= 0xC1 && key <= 0xDA))
+            { //Key exists and is not blacklisted
+                if (Feeder != null) //Check against current binds
+                {
+                    Dictionary<uint, uint> curBinds = Feeder.GetKeybindDictionary();
+                    DeleteKeyVal(ref curBinds, keyDir);
+                    try
+                    {
+                        curBinds.Add(key, keyDir);
+                    }
+                    catch (ArgumentException e)
+                    {
+                        isKeyValid = false;
+                    }
+                }
+            }
+            else
+            {
+                consoleBox.Invoke(new Action(() => ConsoleAddLine("Invalid key")));
+                isKeyValid = false;
+            }
+            return isKeyValid;
+        }
+
+        private void DeleteKeyVal(ref Dictionary<uint, uint> dic, uint val)
+        {
+            foreach (KeyValuePair<uint, uint> pair in dic)
+            {
+                if (pair.Value == val)
+                {
+                    dic.Remove(pair.Key);
+                    break;
+                }
+            }
+        }
+
+        private string GetKeyName(uint key)
+        {
+            return System.Windows.Input.KeyInterop.KeyFromVirtualKey((int)key).ToString("G"); //"G" for general format. Look up enum format strings
         }
 
         private bool SaveBinds(uint keyDir, uint key)
@@ -170,32 +315,9 @@ namespace csgoWalk
             if (File.Exists(saveDataPath))
             {
                 consoleBox.Invoke(new Action(() => ConsoleAddLine("Saving keybind...")));
-                if (key >= 0x08 && key <= 0xFE && key != 0x07 && key != 0x0A && key != 0x0B && key != 0x0E && key != 0x0F && key != 0x16 &&
-                key != 0x1A && key != 0x5E && key != 0xB8 && key != 0xB9 && key != 0xE0 && key != 0xE8 && key != 0xFC && !(key >= 0x3A &&
-                key <= 0x40) && !(key >= 0x88 && key <= 0x8F) && !(key >= 0x97 && key <= 0x9F) && !(key >= 0xC1 && key <= 0xDA))
+                if (IsValidKey(keyDir, key))
                 { //Key exists and is not blacklisted
-                    string curString = System.Windows.Input.KeyInterop.KeyFromVirtualKey((int)key).ToString("G"); //"G" for general format. Look up enum format strings
-                    switch (keyDir)
-                    {
-                        case KEY_FORWARD:
-                            Feeder.SetKeyBind("forward", key);
-                            consoleBox.Invoke(new Action(() => upBind.Text = curString));
-                            break;
-                        case KEY_RIGHT:
-                            Feeder.SetKeyBind("right", key);
-                            consoleBox.Invoke(new Action(() => rightBind.Text = curString));
-                            break;
-                        case KEY_BACKWARD:
-                            Feeder.SetKeyBind("backward", key);
-                            consoleBox.Invoke(new Action(() => downBind.Text = curString));
-                            break;
-                        case KEY_LEFT:
-                            Feeder.SetKeyBind("left", key);
-                            consoleBox.Invoke(new Action(() => leftBind.Text = curString));
-                            break;
-                        default:
-                            break;
-                    }
+                    SetKeyBind(keyDir, key);
 
                     XmlDocument saveDataxml = new XmlDocument();
                     saveDataxml.Load(saveDataPath);
@@ -260,6 +382,7 @@ namespace csgoWalk
         private void KbHook_KeyPress(object sender, InputEventArg e)
         {
             lastKeyPress = (uint)e.KeyPressEvent.VKey;
+
             ((RawKeyboard)sender).KeyPressed -= KbHook_KeyPress;
             sender = null;
             waitForKeyPress.Set(); //Allow GetKeyPress to continue
@@ -290,50 +413,37 @@ namespace csgoWalk
 
         private void GetKeyPress(uint direction, Button button)
         {
-            string initButText = (string)this.Invoke(new GetButtonTextDelegate(GetButtonText), button);
-
+            uint lastKeyBind = GetKeyBind(direction);
             Task.Factory.StartNew(() => GetKeyPressHelper()); //Spawn RawInput object on new thread
             consoleBox.Invoke(new Action(() => ConsoleAddLine("Waiting for keypress...")));
             Invoke(new SetButtonTextDelegate(SetButtonText), button, "Press a key");
             waitForKeyPress.WaitOne(); //Wait for kbHook_KeyPress to return a keypress
             waitForKeyPress.Reset(); //Prepare kbHook_KeyPress for next time
 
-            uint[] curKeyBinds = new uint[4];
-            for (uint i = 0; i < 4; ++i)
+            if (!IsValidKey(direction, lastKeyPress))
             {
-                int curBind = Feeder.GetKeyBind(i);
-                if (curBind == -1)
+                if (!IsValidKey(direction, lastKeyBind))
                 {
-                    switch (i)
-                    {
-                        case KEY_FORWARD:
-                            curKeyBinds[i] = 0x57;
-                            break;
-                        case KEY_RIGHT:
-                            curKeyBinds[i] = 0x44;
-                            break;
-                        case KEY_BACKWARD:
-                            curKeyBinds[i] = 0x53;
-                            break;
-                        case KEY_LEFT:
-                            curKeyBinds[i] = 0x41;
-                            break;
-                        default:
-                            break;
-                    }
+                    consoleBox.Invoke(new Action(() => ConsoleAddLine("Detected duplicate keybinds. Resetting all binds...")));
+                    Feeder.ResetKeyBinds();
                 }
-                else curKeyBinds[i] = (uint)curBind;
+                else
+                {
+                    consoleBox.Invoke(new Action(() => ConsoleAddLine("Invalid keypress. Not changing binds.")));
+                    SetKeyBind(direction, lastKeyBind);
+                }
             }
+            else
+            {
+                SetKeyBind(direction, lastKeyPress);
+            }
+
+            Dictionary<uint, uint> curBinds = Feeder.GetKeybindDictionary();
             
             waitForFeeder.Reset();
             Feeder.Dispose();
             FeederThread.Dispose();
-            FeederThread.ContinueWith(delegate {CreateNewFeeder(1, curKeyBinds[KEY_LEFT], curKeyBinds[KEY_RIGHT], curKeyBinds[KEY_FORWARD], curKeyBinds[KEY_BACKWARD]);}); //Spawn Feeder on new thread so we don't block the UI thread
-
-            if (!SaveBinds(direction, lastKeyPress))
-            {
-                Invoke(new SetButtonTextDelegate(SetButtonText), button, initButText);
-            }
+            FeederThread.ContinueWith(delegate {CreateNewFeeder(1, curBinds);}); //Spawn Feeder on new thread so we don't block the UI thread
         }
 
         private void upBind_Click(object sender, EventArgs e)

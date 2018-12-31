@@ -154,32 +154,119 @@ namespace csgoWalk
 
         public void SetKeyBind(string direction, uint key)
         {
-            switch (direction)
+            try
             {
-                case "left":
-                    keysDown = (byte)(keysDown & 0x0111);
-                    DeleteKeyVal(ref keyBinds, KEY_LEFT);
-                    keyBinds.Add(key, KEY_LEFT);
-                    break;
-                case "right":
-                    keysDown = (byte)(keysDown & 0x1011);
-                    DeleteKeyVal(ref keyBinds, KEY_RIGHT);
-                    keyBinds.Add(key, KEY_RIGHT);
-                    break;
-                case "forward":
-                    keysDown = (byte)(keysDown & 0x1101);
-                    DeleteKeyVal(ref keyBinds, KEY_FORWARD);
-                    keyBinds.Add(key, KEY_FORWARD);
-                    break;
-                case "backward":
-                    keysDown = (byte)(keysDown & 0x1110);
-                    DeleteKeyVal(ref keyBinds, KEY_BACKWARD);
-                    keyBinds.Add(key, KEY_BACKWARD);
-                    break;
-                default:
-                    break;
+                switch (direction)
+                {
+                    case "left":
+                        keysDown = (byte)(keysDown & 0x0111);
+                        DeleteKeyVal(ref keyBinds, KEY_LEFT);
+                        keyBinds.Add(key, KEY_LEFT);
+                        break;
+                    case "right":
+                        keysDown = (byte)(keysDown & 0x1011);
+                        DeleteKeyVal(ref keyBinds, KEY_RIGHT);
+                        keyBinds.Add(key, KEY_RIGHT);
+                        break;
+                    case "forward":
+                        keysDown = (byte)(keysDown & 0x1101);
+                        DeleteKeyVal(ref keyBinds, KEY_FORWARD);
+                        keyBinds.Add(key, KEY_FORWARD);
+                        break;
+                    case "backward":
+                        keysDown = (byte)(keysDown & 0x1110);
+                        DeleteKeyVal(ref keyBinds, KEY_BACKWARD);
+                        keyBinds.Add(key, KEY_BACKWARD);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (ArgumentException e)
+            {
+                switch (direction)
+                {
+                    case "left":
+                        keyBinds.Add(0x41, KEY_LEFT);
+                        break;
+                    case "right":
+                        keyBinds.Add(0x44, KEY_RIGHT);
+                        break;
+                    case "forward":
+                        keyBinds.Add(0x57, KEY_FORWARD);
+                        break;
+                    case "backward":
+                        keyBinds.Add(0x53, KEY_BACKWARD);
+                        break;
+                    default:
+                        break;
+                }
             }
             return;
+        }
+
+        public void SetKeyBind(uint direction, uint key)
+        {
+            try
+            {
+                switch (direction)
+                {
+                    case KEY_LEFT:
+                        keysDown = (byte)(keysDown & 0x0111);
+                        DeleteKeyVal(ref keyBinds, KEY_LEFT);
+                        keyBinds.Add(key, KEY_LEFT);
+                        break;
+                    case KEY_RIGHT:
+                        keysDown = (byte)(keysDown & 0x1011);
+                        DeleteKeyVal(ref keyBinds, KEY_RIGHT);
+                        keyBinds.Add(key, KEY_RIGHT);
+                        break;
+                    case KEY_FORWARD:
+                        keysDown = (byte)(keysDown & 0x1101);
+                        DeleteKeyVal(ref keyBinds, KEY_FORWARD);
+                        keyBinds.Add(key, KEY_FORWARD);
+                        break;
+                    case KEY_BACKWARD:
+                        keysDown = (byte)(keysDown & 0x1110);
+                        DeleteKeyVal(ref keyBinds, KEY_BACKWARD);
+                        keyBinds.Add(key, KEY_BACKWARD);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (ArgumentException e)
+            {
+                switch (direction)
+                {
+                    case KEY_LEFT:
+                        keyBinds.Add(0x41, KEY_LEFT);
+                        break;
+                    case KEY_RIGHT:
+                        keyBinds.Add(0x44, KEY_RIGHT);
+                        break;
+                    case KEY_FORWARD:
+                        keyBinds.Add(0x57, KEY_FORWARD);
+                        break;
+                    case KEY_BACKWARD:
+                        keyBinds.Add(0x53, KEY_BACKWARD);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return;
+        }
+
+        public void ResetKeyBinds()
+        {
+            keyBinds = new Dictionary<uint, uint>(4)
+            {
+                {0x57, KEY_FORWARD}, //https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
+                {0x44, KEY_RIGHT},
+                {0x53, KEY_BACKWARD},
+                {0x41, KEY_LEFT}
+            };
         }
 
         public int GetKeyBind(uint direction)
@@ -235,24 +322,39 @@ namespace csgoWalk
 
         public Feeder() : this(1) //calls uint constructor with args of 1
         {
-            keyBinds = new Dictionary<uint, uint>(4)
-            {
-                {0x57, KEY_FORWARD}, //https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes
-                {0x44, KEY_RIGHT},
-                {0x53, KEY_BACKWARD},
-                {0x41, KEY_LEFT}
-            };
+            ResetKeyBinds();
         }
 
         public Feeder(uint inputId, uint keyLeft, uint keyRight, uint keyForward, uint keyBackward) : this (inputId)
         {
-            keyBinds = new Dictionary<uint, uint>(4)
+            try
             {
-                {keyForward, KEY_FORWARD},
-                {keyRight, KEY_RIGHT},
-                {keyBackward, KEY_BACKWARD},
-                {keyLeft, KEY_LEFT}
-            };
+                keyBinds = new Dictionary<uint, uint>(4)
+                {
+                    {keyForward, KEY_FORWARD},
+                    {keyRight, KEY_RIGHT},
+                    {keyBackward, KEY_BACKWARD},
+                    {keyLeft, KEY_LEFT}
+                };
+            }
+            catch (ArgumentException e)
+            {
+                SendConsoleText("Invalid constructor. Loading defaults...");
+                ResetKeyBinds();
+            }
+        }
+
+        public Feeder(uint inputId, Dictionary<uint, uint> keys) : this(inputId)
+        {
+            if (keys.Count == 4)
+            { //correct size
+                keyBinds = keys;
+            }
+            else
+            { //incorrect size
+                SendConsoleText("Invalid constructor size. Loading defaults...");
+                ResetKeyBinds();
+            }
         }
 
         public Feeder(uint inputId) //From the vJoy SDK with adjustment from lopezk38
@@ -274,6 +376,7 @@ namespace csgoWalk
                 SendConsoleText("vJoy driver not enabled: Failed Getting vJoy attributes. Exiting...");
                 return;
             }
+            /*
             else
             {
                 SendConsoleText("Vendor: " + joystick.GetvJoyManufacturerString());
@@ -281,6 +384,7 @@ namespace csgoWalk
                 SendConsoleText("Version Number: " + joystick.GetvJoySerialNumberString());
                 SendConsoleText(Environment.NewLine);
             }
+            */
 
             // Get the state of the requested device
             VjdStat status = joystick.GetVJDStatus(id);
@@ -290,7 +394,7 @@ namespace csgoWalk
                     SendConsoleText("vJoy Device " + id.ToString() + " is already owned by this feeder\n");
                     break;
                 case VjdStat.VJD_STAT_FREE:
-                    SendConsoleText("vJoy Device " + id.ToString() + " is free\n");
+                    //SendConsoleText("vJoy Device " + id.ToString() + " is free\n");
                     break;
                 case VjdStat.VJD_STAT_BUSY:
                     SendConsoleText("vJoy Device " + id.ToString() + " is already owned by another feeder. Exiting...");
@@ -308,21 +412,21 @@ namespace csgoWalk
             bool AxisY = joystick.GetVJDAxisExist(id, HID_USAGES.HID_USAGE_Y);
 
             // Print results
-            SendConsoleText(Environment.NewLine);
-            SendConsoleText("vJoy Device " + id.ToString() + " capabilities:");
-            if (AxisX) SendConsoleText("X axis present: Yes");
+            //SendConsoleText(Environment.NewLine);
+            //SendConsoleText("vJoy Device " + id.ToString() + " capabilities:");
+            if (AxisX) ;// SendConsoleText("X axis present: Yes");
             else SendConsoleText("X axis present: No" + Environment.NewLine + "This will not work without the X axis");
 
-            if (AxisY) SendConsoleText("Y axis present: Yes");
+            if (AxisY) ;// SendConsoleText("Y axis present: Yes");
             else SendConsoleText("Y axis present: No" + Environment.NewLine + "This will not work without the Y axis");
 
-            SendConsoleText(Environment.NewLine);
+            //SendConsoleText(Environment.NewLine);
 
             // Test if DLL matches the driver
             UInt32 DllVer = 0, DrvVer = 0;
             bool match = joystick.DriverMatch(ref DllVer, ref DrvVer);
             if (match)
-                SendConsoleText("Version of Driver Matches DLL Version " + DllVer.ToString());
+                ;//SendConsoleText("Version of Driver Matches DLL Version " + DllVer.ToString());
             else
                 SendConsoleText("Version of Driver (" + DrvVer.ToString() + ") does NOT match DLL Version (" + DllVer.ToString() + ")");
 
@@ -348,7 +452,17 @@ namespace csgoWalk
 
             iReport.Buttons = (uint)(0x0000);
             UpdateAnalogValue();
-            SendConsoleText("Feeder initialized successfully");
+            SendConsoleText("Feeder initialized");
+        }
+
+        public Dictionary<uint, uint> GetKeybindDictionary()
+        {
+            Dictionary<uint, uint> newDic = new Dictionary<uint, uint>();
+            foreach (KeyValuePair<uint, uint> pair in keyBinds)
+            {
+                newDic.Add(pair.Key, pair.Value);
+            }
+            return newDic;
         }
 
         private void DeleteKeyVal(ref Dictionary<uint, uint> dic, uint val)
