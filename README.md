@@ -22,8 +22,8 @@ Installation:
 	Step 1. Install dependancies.
 	Step 2. "Run C:\Program Files\vJoy\x64\vJoyConf.exe" and make sure the X and Y axes are enabled. Disable everything else. Make sure Enable vJoy is checked.
 	Step 3. Run the binary in "csgoWalk\bin\Debug\csgoWalk.exe"
-	Step 4. Enable joystick in CS:GO settings
-	Step 5. Run "joystick 1" in CS:GO console
+	Step 4. Copy "analogWalk.cfg" to "<Your CS:GO install directory>\csgo\cfg\"
+	Step 5. Add "exec analogWalk.cfg" to your autoexec.cfg or run it in console whenever you want to use the binds
 	
 Other notes:
 	You can use joy_forwardthreshold "0.1" to adjust the speed at which you move. A value of "0.1" will make you move at 130 units/second while "0.15" will make you move at 112 units/s
