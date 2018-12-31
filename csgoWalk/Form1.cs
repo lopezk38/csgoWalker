@@ -13,14 +13,16 @@ namespace csgoWalk
     {
         public Feeder Feeder;
         public IntPtr HWND;
+        public Control invokerControl = new Control(); //So we can callback from the feeder
 
         private string saveDataPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location) + "\\keyBinds.xml";
 
         private ManualResetEvent waitForFeeder = new ManualResetEvent(false);
-        private ManualResetEvent waitForFileOp = new ManualResetEvent(true);
         private ManualResetEvent waitForKeyPress = new ManualResetEvent(false);
-        private ManualResetEvent keyPressEventLock = new ManualResetEvent(true);
-        private ManualResetEvent saveAllPacerLock = new ManualResetEvent(false);
+
+        private static Task FeederThread;
+        private static Task fileOpThread = Task.Factory.StartNew(() => { });
+        private static Task keyBindThread = Task.Factory.StartNew(() => { });
 
         private const int KEY_FORWARD = 0;
         private const int KEY_RIGHT = 1;
@@ -35,6 +37,7 @@ namespace csgoWalk
         public walkerWindow()
         {
             InitializeComponent();
+            invokerControl.CreateControl();
             ConsoleAddLine("Initialized");
         }
 
@@ -73,16 +76,24 @@ namespace csgoWalk
         {
             HWND = this.Handle;
             consoleBox.Select();
+            FeederThread = Task.Factory.StartNew(() => CreateNewFeeder());//Spawn Feeder on new thread so we don't block the UI thread
+            fileOpThread.ContinueWith(delegate {LoadSavedBinds();}); //Spawn LoadSaveBinds() on new scheduled thread so we don't block the UI thread
+        }
+
+        private void CreateNewFeeder()
+        {
             Feeder = new Feeder();
             waitForFeeder.Set();
-            Task.Factory.StartNew(() => LoadSavedBinds()); //Spawn LoadSaveBinds() on new thread so we don't block the UI thread
+        }
+
+        private void CreateNewFeeder(uint id, uint left, uint right, uint forward, uint back)
+        {
+            Feeder = new Feeder(id, left, right, forward, back);
+            waitForFeeder.Set();
         }
 
         private void LoadSavedBinds()
         {
-            waitForFileOp.WaitOne(); //Check if file is being accessed. Wait until it's free if it isn't.
-            waitForFileOp.Reset(); //Lock file
-
             consoleBox.Invoke(new Action(() => ConsoleAddLine("Loading saved keybinds...")));
             if (Feeder == null)
             {
@@ -145,21 +156,14 @@ namespace csgoWalk
                 //file does not exist
                 CreateNewSaveFile();
             }
-            waitForFileOp.Set(); //Unlock file
         }
 
-        private bool SaveBinds(uint keyDir, uint key, bool recursive)
+        private bool SaveBinds(uint keyDir, uint key)
         {
-            if (!recursive)
-            {
-                waitForFileOp.WaitOne(); //Check if file is being accessed. Wait until it's free if it isn't.
-                waitForFileOp.Reset(); //Lock file
-            }
 
             if (keyDir > 3)
             {
                 consoleBox.Invoke(new Action(() => ConsoleAddLine("Invalid key direction given to SaveBinds. Keybind not saved.")));
-                waitForFileOp.Set(); //Unlock file
                 return false;
             }
 
@@ -198,20 +202,18 @@ namespace csgoWalk
                     saveDataxml.DocumentElement.ChildNodes[(int)keyDir].InnerText = key.ToString();
                     saveDataxml.Save(saveDataPath);
                     consoleBox.Invoke(new Action(() => ConsoleAddLine("Save completed")));
-                    waitForFileOp.Set(); //Unlock file
                     return true;
                 }
                 else
                 {
                     consoleBox.Invoke(new Action(() => ConsoleAddLine("Invalid key. Keybind not saved.")));
-                    waitForFileOp.Set(); //Unlock file
                     return false;
                 }
             }
             else
             {
                 CreateNewSaveFile();
-                return SaveBinds(keyDir, key, true);
+                return SaveBinds(keyDir, key);
             }
         }
 
@@ -239,20 +241,20 @@ namespace csgoWalk
 
         private void saveButton_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => SaveAll()); //Call SaveAll() on new thread so we don't block the UI thread
+            fileOpThread.ContinueWith(delegate {SaveAll();}); //Call SaveAll() on synchronous thread so we don't block the UI thread
         }
 
         private void SaveAll()
         {
-            SaveBinds(KEY_FORWARD, (uint)Feeder.GetKeyBind(KEY_FORWARD), false);
-            SaveBinds(KEY_RIGHT, (uint)Feeder.GetKeyBind(KEY_RIGHT), false);
-            SaveBinds(KEY_BACKWARD, (uint)Feeder.GetKeyBind(KEY_BACKWARD), false);
-            SaveBinds(KEY_LEFT, (uint)Feeder.GetKeyBind(KEY_LEFT), false);
+            SaveBinds(KEY_FORWARD, (uint)Feeder.GetKeyBind(KEY_FORWARD));
+            SaveBinds(KEY_RIGHT, (uint)Feeder.GetKeyBind(KEY_RIGHT));
+            SaveBinds(KEY_BACKWARD, (uint)Feeder.GetKeyBind(KEY_BACKWARD));
+            SaveBinds(KEY_LEFT, (uint)Feeder.GetKeyBind(KEY_LEFT));
         }
 
         private void loadButton_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => LoadSavedBinds()); //Call LoadSavedBinds() on new thread so we don't block the UI thread
+            fileOpThread.ContinueWith(delegate {LoadSavedBinds();}); //Call LoadSavedBinds() on synchronous thread so we don't block the UI thread
         }
 
         private void KbHook_KeyPress(object sender, InputEventArg e)
@@ -288,10 +290,6 @@ namespace csgoWalk
 
         private void GetKeyPress(uint direction, Button button)
         {
-            keyPressEventLock.WaitOne(); //Check if another button is waiting on a keypress, wait for them to get it
-            keyPressEventLock.Reset(); //Lock keypress to this call
-
-
             string initButText = (string)this.Invoke(new GetButtonTextDelegate(GetButtonText), button);
 
             Task.Factory.StartNew(() => GetKeyPressHelper()); //Spawn RawInput object on new thread
@@ -300,32 +298,66 @@ namespace csgoWalk
             waitForKeyPress.WaitOne(); //Wait for kbHook_KeyPress to return a keypress
             waitForKeyPress.Reset(); //Prepare kbHook_KeyPress for next time
 
-            if (!SaveBinds(direction, lastKeyPress, false))
+            uint[] curKeyBinds = new uint[4];
+            for (uint i = 0; i < 4; ++i)
+            {
+                int curBind = Feeder.GetKeyBind(i);
+                if (curBind == -1)
+                {
+                    switch (i)
+                    {
+                        case KEY_FORWARD:
+                            curKeyBinds[i] = 0x57;
+                            break;
+                        case KEY_RIGHT:
+                            curKeyBinds[i] = 0x44;
+                            break;
+                        case KEY_BACKWARD:
+                            curKeyBinds[i] = 0x53;
+                            break;
+                        case KEY_LEFT:
+                            curKeyBinds[i] = 0x41;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else curKeyBinds[i] = (uint)curBind;
+            }
+            
+            waitForFeeder.Reset();
+            Feeder.Dispose();
+            FeederThread.Dispose();
+            FeederThread.ContinueWith(delegate {CreateNewFeeder(1, curKeyBinds[KEY_LEFT], curKeyBinds[KEY_RIGHT], curKeyBinds[KEY_FORWARD], curKeyBinds[KEY_BACKWARD]);}); //Spawn Feeder on new thread so we don't block the UI thread
+
+            if (!SaveBinds(direction, lastKeyPress))
             {
                 Invoke(new SetButtonTextDelegate(SetButtonText), button, initButText);
             }
-
-            keyPressEventLock.Set(); //Unlock keypress to this call
         }
 
         private void upBind_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => GetKeyPress(KEY_FORWARD, this.upBind)); //Start new async task running method GetKeyPress()
+            consoleBox.Select();
+            keyBindThread.ContinueWith(delegate {GetKeyPress(KEY_FORWARD, this.upBind);}); //Add GetKeyPress call to keyPress schedule to run synchronously
         }
 
         private void leftBind_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => GetKeyPress(KEY_LEFT, this.leftBind)); //Start new async task running method GetKeyPress()
+            consoleBox.Select();
+            keyBindThread.ContinueWith(delegate {GetKeyPress(KEY_LEFT, this.leftBind);}); //Add GetKeyPress call to keyPress schedule to run synchronously
         }
 
         private void downBind_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => GetKeyPress(KEY_BACKWARD, this.downBind)); //Start new async task running method GetKeyPress()
+            consoleBox.Select();
+            keyBindThread.ContinueWith(delegate {GetKeyPress(KEY_BACKWARD, this.downBind);}); //Add GetKeyPress call to keyPress schedule to run synchronously
         }
 
         private void rightBind_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => GetKeyPress(KEY_RIGHT, this.rightBind)); //Start new async task running method GetKeyPress()
+            consoleBox.Select();
+            keyBindThread.ContinueWith(delegate {GetKeyPress(KEY_RIGHT, this.rightBind);}); //Add GetKeyPress call to keyPress schedule to run synchronously
         }
     }
 }

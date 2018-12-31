@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using vJoyInterfaceWrap;
 using RawInput_dll; //From https://www.codeproject.com/Articles/17123/%2FArticles%2F17123%2FUsing-Raw-Input-from-C-to-handle-multiple-keyboard
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace csgoWalk
 {
@@ -71,6 +73,8 @@ namespace csgoWalk
 
         private const uint GET_LSB = BACKWARD_OR;
 
+        private static Task taskThread = Task.Factory.StartNew(() => {});
+
         private static Dictionary<uint, uint> keyBinds;
 
         private static void KbHook_KeyPress(object sender, InputEventArg e)
@@ -102,9 +106,15 @@ namespace csgoWalk
 
             if (!joystick.UpdateVJD(id, ref iReport))
             {
-                Program.walkerWindowObj.ConsoleAddLine("Feeding vJoy device number " + id.ToString() + " failed - Is the device enabled?");
+
+                SendConsoleText("Feeding vJoy device number " + id.ToString() + " failed - Is the device enabled?");
                 joystick.AcquireVJD(id);
             }
+        }
+
+        private static void SendConsoleText(string str)
+        {
+            Program.walkerWindowObj.invokerControl.Invoke(new Action(() => Program.walkerWindowObj.ConsoleAddLine(str)));
         }
 
         private static void UpdateKeysDown(uint direction, uint keyDownMes)
@@ -117,27 +127,27 @@ namespace csgoWalk
             {
                 case KEY_FORWARD:
                     if (keyDown == Convert.ToBoolean((keysDown >> 1) & GET_LSB)) break;
-                    if (keyDown) {keysDown = (byte)(keysDown | FORWARD_OR);}
-                    else {keysDown = (byte)(keysDown & FORWARD_AND);}
-                    UpdateAnalogValue();
+                    if (keyDown) {keysDown = (byte)(keysDown | FORWARD_OR); Program.walkerWindowObj.SetBindButtonColor((int)KEY_FORWARD, true);}
+                    else {keysDown = (byte)(keysDown & FORWARD_AND); Program.walkerWindowObj.SetBindButtonColor((int)KEY_FORWARD, false);}
+                    taskThread.ContinueWith(delegate {UpdateAnalogValue();}); //Add UpdateAnalogValue to taskThread schedule to run syncronously
                     break;
                 case KEY_RIGHT:
                     if (keyDown == Convert.ToBoolean((keysDown >> 2) & GET_LSB)) break;
-                    if (keyDown) {keysDown = (byte)(keysDown | RIGHT_OR);}
-                    else {keysDown = (byte)(keysDown & RIGHT_AND);}
-                    UpdateAnalogValue();
+                    if (keyDown) {keysDown = (byte)(keysDown | RIGHT_OR); Program.walkerWindowObj.SetBindButtonColor((int)KEY_RIGHT, true);}
+                    else {keysDown = (byte)(keysDown & RIGHT_AND); Program.walkerWindowObj.SetBindButtonColor((int)KEY_RIGHT, false);}
+                    taskThread.ContinueWith(delegate {UpdateAnalogValue();}); //Add UpdateAnalogValue to taskThread schedule to run syncronously
                     break;
                 case KEY_BACKWARD:
                     if (keyDown == Convert.ToBoolean(keysDown & GET_LSB)) break;
-                    if (keyDown) {keysDown = (byte)(keysDown | BACKWARD_OR);}
-                    else {keysDown = (byte)(keysDown & BACKWARD_AND);}
-                    UpdateAnalogValue();
+                    if (keyDown) {keysDown = (byte)(keysDown | BACKWARD_OR); Program.walkerWindowObj.SetBindButtonColor((int)KEY_BACKWARD, true);}
+                    else {keysDown = (byte)(keysDown & BACKWARD_AND); Program.walkerWindowObj.SetBindButtonColor((int)KEY_BACKWARD, false);}
+                    taskThread.ContinueWith(delegate {UpdateAnalogValue();}); //Add UpdateAnalogValue to taskThread schedule to run syncronously
                     break;
                 case KEY_LEFT:
                     if (keyDown == Convert.ToBoolean((keysDown >> 3) & GET_LSB)) break;
-                    if (keyDown) {keysDown = (byte)(keysDown | LEFT_OR);}
-                    else {keysDown = (byte)(keysDown & LEFT_AND);}
-                    UpdateAnalogValue();
+                    if (keyDown) {keysDown = (byte)(keysDown | LEFT_OR); Program.walkerWindowObj.SetBindButtonColor((int)KEY_LEFT, true);}
+                    else {keysDown = (byte)(keysDown & LEFT_AND); Program.walkerWindowObj.SetBindButtonColor((int)KEY_LEFT, false);}
+                    taskThread.ContinueWith(delegate {UpdateAnalogValue();}); //Add UpdateAnalogValue to taskThread schedule to run syncronously
                     break;
             }
         }
@@ -211,6 +221,18 @@ namespace csgoWalk
             return GetKeyBind(strDir);
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            joystick.RelinquishVJD(id);
+            SendConsoleText("Relinquishing joystick...");
+        }
+
         public Feeder() : this(1) //calls uint constructor with args of 1
         {
             keyBinds = new Dictionary<uint, uint>(4)
@@ -242,22 +264,22 @@ namespace csgoWalk
             // Device ID can only be in the range 1-16
             if (id <= 0 || id > 16)
             {
-                Program.walkerWindowObj.ConsoleAddLine("Illegal device ID " + id.ToString() + " Exiting...");
+                SendConsoleText("Illegal device ID " + id.ToString() + " Exiting...");
                 return;
             }
 
             // Get the driver attributes (Vendor ID, Product ID, Version Number)
             if (!joystick.vJoyEnabled())
             {
-                Program.walkerWindowObj.ConsoleAddLine("vJoy driver not enabled: Failed Getting vJoy attributes. Exiting...");
+                SendConsoleText("vJoy driver not enabled: Failed Getting vJoy attributes. Exiting...");
                 return;
             }
             else
             {
-                Program.walkerWindowObj.ConsoleAddLine("Vendor: " + joystick.GetvJoyManufacturerString());
-                Program.walkerWindowObj.ConsoleAddLine("Product: " + joystick.GetvJoyProductString());
-                Program.walkerWindowObj.ConsoleAddLine("Version Number: " + joystick.GetvJoySerialNumberString());
-                Program.walkerWindowObj.ConsoleAddLine(Environment.NewLine);
+                SendConsoleText("Vendor: " + joystick.GetvJoyManufacturerString());
+                SendConsoleText("Product: " + joystick.GetvJoyProductString());
+                SendConsoleText("Version Number: " + joystick.GetvJoySerialNumberString());
+                SendConsoleText(Environment.NewLine);
             }
 
             // Get the state of the requested device
@@ -265,19 +287,19 @@ namespace csgoWalk
             switch (status)
             {
                 case VjdStat.VJD_STAT_OWN:
-                    Program.walkerWindowObj.ConsoleAddLine("vJoy Device " + id.ToString() + " is already owned by this feeder\n");
+                    SendConsoleText("vJoy Device " + id.ToString() + " is already owned by this feeder\n");
                     break;
                 case VjdStat.VJD_STAT_FREE:
-                    Program.walkerWindowObj.ConsoleAddLine("vJoy Device " + id.ToString() + " is free\n");
+                    SendConsoleText("vJoy Device " + id.ToString() + " is free\n");
                     break;
                 case VjdStat.VJD_STAT_BUSY:
-                    Program.walkerWindowObj.ConsoleAddLine("vJoy Device " + id.ToString() + " is already owned by another feeder. Exiting...");
+                    SendConsoleText("vJoy Device " + id.ToString() + " is already owned by another feeder. Exiting...");
                     return;
                 case VjdStat.VJD_STAT_MISS:
-                    Program.walkerWindowObj.ConsoleAddLine("vJoy Device " + id.ToString() + " is not installed or disabled. Exiting...");
+                    SendConsoleText("vJoy Device " + id.ToString() + " is not installed or disabled. Exiting...");
                     return;
                 default:
-                    Program.walkerWindowObj.ConsoleAddLine("vJoy Device " + id.ToString() + " general error. Exiting...");
+                    SendConsoleText("vJoy Device " + id.ToString() + " general error. Exiting...");
                     return;
             };
 
@@ -286,33 +308,33 @@ namespace csgoWalk
             bool AxisY = joystick.GetVJDAxisExist(id, HID_USAGES.HID_USAGE_Y);
 
             // Print results
-            Program.walkerWindowObj.ConsoleAddLine(Environment.NewLine);
-            Program.walkerWindowObj.ConsoleAddLine("vJoy Device " + id.ToString() + " capabilities:");
-            if (AxisX) Program.walkerWindowObj.ConsoleAddLine("X axis present: Yes");
-            else Program.walkerWindowObj.ConsoleAddLine("X axis present: No" + Environment.NewLine + "This will not work without the X axis");
+            SendConsoleText(Environment.NewLine);
+            SendConsoleText("vJoy Device " + id.ToString() + " capabilities:");
+            if (AxisX) SendConsoleText("X axis present: Yes");
+            else SendConsoleText("X axis present: No" + Environment.NewLine + "This will not work without the X axis");
 
-            if (AxisY) Program.walkerWindowObj.ConsoleAddLine("Y axis present: Yes");
-            else Program.walkerWindowObj.ConsoleAddLine("Y axis present: No" + Environment.NewLine + "This will not work without the Y axis");
+            if (AxisY) SendConsoleText("Y axis present: Yes");
+            else SendConsoleText("Y axis present: No" + Environment.NewLine + "This will not work without the Y axis");
 
-            Program.walkerWindowObj.ConsoleAddLine(Environment.NewLine);
+            SendConsoleText(Environment.NewLine);
 
             // Test if DLL matches the driver
             UInt32 DllVer = 0, DrvVer = 0;
             bool match = joystick.DriverMatch(ref DllVer, ref DrvVer);
             if (match)
-                Program.walkerWindowObj.ConsoleAddLine("Version of Driver Matches DLL Version " + DllVer.ToString());
+                SendConsoleText("Version of Driver Matches DLL Version " + DllVer.ToString());
             else
-                Program.walkerWindowObj.ConsoleAddLine("Version of Driver (" + DrvVer.ToString() + ") does NOT match DLL Version (" + DllVer.ToString() + ")");
+                SendConsoleText("Version of Driver (" + DrvVer.ToString() + ") does NOT match DLL Version (" + DllVer.ToString() + ")");
 
 
             // Acquire the target
             if ((status == VjdStat.VJD_STAT_OWN) || ((status == VjdStat.VJD_STAT_FREE) && (!joystick.AcquireVJD(id))))
             {
-                Program.walkerWindowObj.ConsoleAddLine("Failed to acquire vJoy device number " + id.ToString() + ". Exiting...");
+                SendConsoleText("Failed to acquire vJoy device number " + id.ToString() + ". Exiting...");
                 return;
             }
             else
-                Program.walkerWindowObj.ConsoleAddLine("Acquired: vJoy device number " + id.ToString());
+                SendConsoleText("Acquired: vJoy device number " + id.ToString());
 
             long maxVal = 0;
 
@@ -326,7 +348,7 @@ namespace csgoWalk
 
             iReport.Buttons = (uint)(0x0000);
             UpdateAnalogValue();
-            Program.walkerWindowObj.ConsoleAddLine("Feeder initialized successfully");
+            SendConsoleText("Feeder initialized successfully");
         }
 
         private void DeleteKeyVal(ref Dictionary<uint, uint> dic, uint val)
