@@ -305,10 +305,17 @@ namespace csgoWalk
 
         private bool SaveBinds(uint keyDir, uint key)
         {
+            if (Feeder == null)
+            {
+                consoleBox.Invoke(new Action(() => ConsoleAddLine("Waiting for Feeder to finish initialization before saving binds...")));
+                waitForFeeder.WaitOne(); //wait for Feeder to be initialized
+                waitForFeeder.Reset();
+                consoleBox.Invoke(new Action(() => ConsoleAddLine("Feeder loaded, saving binds...")));
+            }
 
             if (keyDir > 3)
             {
-                consoleBox.Invoke(new Action(() => ConsoleAddLine("Invalid key direction given to SaveBinds. Keybind not saved.")));
+                consoleBox.Invoke(new Action(() => ConsoleAddLine("Invalid key direction given to SaveBinds(). Keybind not saved.")));
                 return false;
             }
 
@@ -426,16 +433,19 @@ namespace csgoWalk
                 {
                     consoleBox.Invoke(new Action(() => ConsoleAddLine("Detected duplicate keybinds. Resetting all binds...")));
                     Feeder.ResetKeyBinds();
+                    SaveAll();
                 }
                 else
                 {
                     consoleBox.Invoke(new Action(() => ConsoleAddLine("Invalid keypress. Not changing binds.")));
                     SetKeyBind(direction, lastKeyBind);
+                    SaveBinds(direction, lastKeyBind);
                 }
             }
             else
             {
                 SetKeyBind(direction, lastKeyPress);
+                SaveBinds(direction, lastKeyPress);
             }
 
             Dictionary<uint, uint> curBinds = Feeder.GetKeybindDictionary();
