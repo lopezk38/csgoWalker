@@ -28,20 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.upBind = new System.Windows.Forms.Button();
             this.downBind = new System.Windows.Forms.Button();
             this.rightBind = new System.Windows.Forms.Button();
             this.leftBind = new System.Windows.Forms.Button();
-            this.upBindHint = new System.Windows.Forms.ToolTip(this.components);
-            this.bindLeftHint = new System.Windows.Forms.ToolTip(this.components);
-            this.bindDownHint = new System.Windows.Forms.ToolTip(this.components);
-            this.bindRightHint = new System.Windows.Forms.ToolTip(this.components);
             this.bindGroup = new System.Windows.Forms.GroupBox();
             this.loadButton = new System.Windows.Forms.Button();
             this.saveButton = new System.Windows.Forms.Button();
             this.consoleBox = new System.Windows.Forms.TextBox();
             this.consoleOutputBox = new System.Windows.Forms.GroupBox();
+            this.resetDefaults = new System.Windows.Forms.Button();
             this.bindGroup.SuspendLayout();
             this.consoleOutputBox.SuspendLayout();
             this.SuspendLayout();
@@ -90,24 +86,9 @@
             this.leftBind.UseVisualStyleBackColor = false;
             this.leftBind.Click += new System.EventHandler(this.leftBind_Click);
             // 
-            // upBindHint
-            // 
-            this.upBindHint.ToolTipTitle = "Click to bind key...";
-            // 
-            // bindLeftHint
-            // 
-            this.bindLeftHint.ToolTipTitle = "Click to bind key...";
-            // 
-            // bindDownHint
-            // 
-            this.bindDownHint.ToolTipTitle = "Click to bind key...";
-            // 
-            // bindRightHint
-            // 
-            this.bindRightHint.ToolTipTitle = "Click to bind key...";
-            // 
             // bindGroup
             // 
+            this.bindGroup.Controls.Add(this.resetDefaults);
             this.bindGroup.Controls.Add(this.loadButton);
             this.bindGroup.Controls.Add(this.saveButton);
             this.bindGroup.Controls.Add(this.leftBind);
@@ -124,9 +105,9 @@
             // loadButton
             // 
             this.loadButton.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.loadButton.Location = new System.Drawing.Point(179, 75);
+            this.loadButton.Location = new System.Drawing.Point(179, 93);
             this.loadButton.Name = "loadButton";
-            this.loadButton.Size = new System.Drawing.Size(158, 50);
+            this.loadButton.Size = new System.Drawing.Size(158, 32);
             this.loadButton.TabIndex = 5;
             this.loadButton.Text = "Load keybinds";
             this.loadButton.UseVisualStyleBackColor = false;
@@ -135,9 +116,9 @@
             // saveButton
             // 
             this.saveButton.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.saveButton.Location = new System.Drawing.Point(179, 19);
+            this.saveButton.Location = new System.Drawing.Point(179, 56);
             this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(158, 50);
+            this.saveButton.Size = new System.Drawing.Size(158, 31);
             this.saveButton.TabIndex = 4;
             this.saveButton.Text = "Save keybinds";
             this.saveButton.UseVisualStyleBackColor = false;
@@ -165,6 +146,17 @@
             this.consoleOutputBox.TabStop = false;
             this.consoleOutputBox.Text = "Console";
             // 
+            // resetDefaults
+            // 
+            this.resetDefaults.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.resetDefaults.Location = new System.Drawing.Point(179, 19);
+            this.resetDefaults.Name = "resetDefaults";
+            this.resetDefaults.Size = new System.Drawing.Size(158, 31);
+            this.resetDefaults.TabIndex = 6;
+            this.resetDefaults.Text = "Reset binds to defaults";
+            this.resetDefaults.UseVisualStyleBackColor = false;
+            this.resetDefaults.Click += new System.EventHandler(this.resetDefaults_Click);
+            // 
             // walkerWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -190,15 +182,12 @@
         private System.Windows.Forms.Button downBind;
         private System.Windows.Forms.Button rightBind;
         private System.Windows.Forms.Button leftBind;
-        private System.Windows.Forms.ToolTip upBindHint;
-        private System.Windows.Forms.ToolTip bindLeftHint;
-        private System.Windows.Forms.ToolTip bindDownHint;
-        private System.Windows.Forms.ToolTip bindRightHint;
         private System.Windows.Forms.GroupBox bindGroup;
         private System.Windows.Forms.TextBox consoleBox;
         private System.Windows.Forms.GroupBox consoleOutputBox;
         private System.Windows.Forms.Button loadButton;
         private System.Windows.Forms.Button saveButton;
+        private System.Windows.Forms.Button resetDefaults;
     }
 }
 

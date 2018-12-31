@@ -433,19 +433,19 @@ namespace csgoWalk
                 {
                     consoleBox.Invoke(new Action(() => ConsoleAddLine("Detected duplicate keybinds. Resetting all binds...")));
                     Feeder.ResetKeyBinds();
-                    SaveAll();
+                    fileOpThread.ContinueWith(delegate {SaveAll();});
                 }
                 else
                 {
                     consoleBox.Invoke(new Action(() => ConsoleAddLine("Invalid keypress. Not changing binds.")));
                     SetKeyBind(direction, lastKeyBind);
-                    SaveBinds(direction, lastKeyBind);
+                    fileOpThread.ContinueWith(delegate {SaveBinds(direction, lastKeyBind);});
                 }
             }
             else
             {
                 SetKeyBind(direction, lastKeyPress);
-                SaveBinds(direction, lastKeyPress);
+                fileOpThread.ContinueWith(delegate { SaveBinds(direction, lastKeyPress);});
             }
 
             Dictionary<uint, uint> curBinds = Feeder.GetKeybindDictionary();
@@ -478,6 +478,12 @@ namespace csgoWalk
         {
             consoleBox.Select();
             keyBindThread.ContinueWith(delegate {GetKeyPress(KEY_RIGHT, this.rightBind);}); //Add GetKeyPress call to keyPress schedule to run synchronously
+        }
+
+        private void resetDefaults_Click(object sender, EventArgs e)
+        {
+            consoleBox.Select();
+            fileOpThread.ContinueWith(delegate {Feeder.ResetKeyBinds(); SaveAll();});
         }
     }
 }
