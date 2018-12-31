@@ -10,11 +10,15 @@ CS:GO has support for controllers built in since it was originally intended to b
 
 The only real downside I found to this method is that if you turn your mouse too quickly (such as to flick at a head at the edge of your screen), you could unintentionally strafe. Strafing in most Source engine games including CS:GO causes your character to gain speed (Which is why strafe jumps are used to jump further than normal distances or to gain speed while bhopping) which will put you above 135 units/s if you aren't careful. Make slow turns or hold the walk key while making sharp turns to avoid this.
 
-This is the first functional build. UI functions aside from console are not functional yet. 
+This is the first fully functional build
 
 External Dependancies:
 
+	vJoy:
 	https://sourceforge.net/projects/vjoystick/files/latest/download
+	
+	.NET Framework 4
+	https://www.microsoft.com/en-us/download/details.aspx?id=17718
 	
 	
 Installation:
@@ -29,5 +33,3 @@ Other notes:
 	You can use joy_forwardthreshold "0.1" to adjust the speed at which you move. A value of "0.1" will make you move at 130 units/second while "0.15" will make you move at 112 units/s
 	
 	By default, the keybinds are WASD and overrides the default CS:GO walking bind with it's own
-	
-	This is the first fully working release
